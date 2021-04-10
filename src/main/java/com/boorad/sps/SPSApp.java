@@ -1,6 +1,10 @@
 package com.boorad.sps;
 
 import com.boorad.sps.input.StartsInput;
+import com.boorad.sps.message.StartsMessage;
+import com.boorad.sps.operator.StartsFilterOperator;
+import com.boorad.sps.operator.StartsJsonDeserOperator;
+import com.boorad.sps.operator.StartsWindowOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,20 +20,52 @@ public class SPSApp {
 
         // TODO: args or config
         final String url = "https://tweet-service.herokuapp.com/sps";
+        final long windowSize = 1 * 1000L; // 1 sec
+        final long lateDataWindowSize = 1 * 60 * 1000; // 1 min
 
-        final StartsInput<String> inputFormat = new StartsInput<>(url);
+        // stream input
+        final StartsInput<String> input = new StartsInput<>(url);
+
+        // string => json => pojo operator
+        final StartsJsonDeserOperator jsonDeserOperator = new StartsJsonDeserOperator();
+        StartsMessage pojo = new StartsMessage();
+
+        // filter operator
+        final StartsFilterOperator filterOperator = new StartsFilterOperator();
+        StartsMessage success = new StartsMessage();
+
+        // 1 sec window operator
+        final StartsWindowOperator windowOperator = new StartsWindowOperator(windowSize, lateDataWindowSize);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 LOG.info("Processing interrupted");
-                inputFormat.close();
+                input.close();
             }
         });
 
-        inputFormat.open();
-        LOG.info("Starting stream processing");
+        // open the input stream
+        input.open();
+
         while (true) {
-            String record = inputFormat.nextRecord();
+            // reset for this iteration
+            pojo = null;
+            success = null;
+
+            String record = input.nextRecord();
+
+            // TODO: these null checks are janky, use Collector or handle in Stream?
+            if( record != null ) {
+                pojo = jsonDeserOperator.process(record);
+            }
+
+            if( pojo != null ) {
+                success = filterOperator.process(pojo);
+            }
+
+            if( success != null ) {
+                windowOperator.process(success);
+            }
         }
 
     }
