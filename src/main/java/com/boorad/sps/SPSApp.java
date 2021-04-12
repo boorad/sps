@@ -63,27 +63,6 @@ public class SPSApp {
             inputStream.add(input.nextRecord());
         }
 
-/*
-            // reset for this iteration
-            pojo = null;
-            success = null;
-
-            String record = input.nextRecord();
-
-            // TODO: these null checks are janky, use Collector or handle in Stream?
-            if( record != null ) {
-                pojo = jsonDeserOperator.process(record);
-            }
-
-            if( pojo != null ) {
-                success = filterOperator.process(pojo);
-            }
-
-            if( success != null ) {
-                windowOperator.process(success);
-            }
-        }
-*/
     }
 
 }
