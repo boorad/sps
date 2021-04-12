@@ -6,6 +6,7 @@ import com.boorad.sps.message.StartsMessage;
 import com.boorad.sps.operator.StartsFilterOperator;
 import com.boorad.sps.operator.StartsJsonDeserOperator;
 import com.boorad.sps.operator.StartsWindowOperator;
+import com.boorad.sps.output.ConsoleOutput;
 import com.boorad.sps.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,9 @@ public class SPSApp {
         final StartsWindowOperator windowOperator = new StartsWindowOperator(filterStream, windowStream, windowSize);
         windowOperator.start();
 
-
+        // output to console
+        ConsoleOutput output = new ConsoleOutput(windowStream);
+        output.start();
 
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
