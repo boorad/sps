@@ -1,10 +1,12 @@
 package com.boorad.sps;
 
 import com.boorad.sps.input.StartsInput;
+import com.boorad.sps.message.StartsAggMessage;
 import com.boorad.sps.message.StartsMessage;
 import com.boorad.sps.operator.StartsFilterOperator;
 import com.boorad.sps.operator.StartsJsonDeserOperator;
 import com.boorad.sps.operator.StartsWindowOperator;
+import com.boorad.sps.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,17 +27,25 @@ public class SPSApp {
 
         // stream input
         final StartsInput<String> input = new StartsInput<>(url);
+        Stream<String> inputStream = new Stream<>();
 
         // string => json => pojo operator
-        final StartsJsonDeserOperator jsonDeserOperator = new StartsJsonDeserOperator();
-        StartsMessage pojo = new StartsMessage();
+        Stream<StartsMessage> deserStream = new Stream<>();
+        final StartsJsonDeserOperator jsonDeserOperator = new StartsJsonDeserOperator(inputStream, deserStream);
+        jsonDeserOperator.start();
 
         // filter operator
-        final StartsFilterOperator filterOperator = new StartsFilterOperator();
-        StartsMessage success = new StartsMessage();
+        Stream<StartsMessage> filterStream = new Stream<>();
+        final StartsFilterOperator filterOperator = new StartsFilterOperator(deserStream, filterStream);
+        filterOperator.start();
 
         // 1 sec window operator
-        final StartsWindowOperator windowOperator = new StartsWindowOperator(windowSize, lateDataWindowSize);
+        Stream<StartsAggMessage> windowStream = new Stream<>();
+        final StartsWindowOperator windowOperator = new StartsWindowOperator(filterStream, windowStream, windowSize, lateDataWindowSize);
+        windowOperator.start();
+
+
+
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -44,10 +54,14 @@ public class SPSApp {
             }
         });
 
-        // open the input stream
+        // open the input
         input.open();
 
         while (true) {
+            inputStream.add(input.nextRecord());
+        }
+
+/*
             // reset for this iteration
             pojo = null;
             success = null;
@@ -67,7 +81,7 @@ public class SPSApp {
                 windowOperator.process(success);
             }
         }
-
+*/
     }
 
 }
