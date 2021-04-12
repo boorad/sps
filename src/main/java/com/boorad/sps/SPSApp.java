@@ -23,7 +23,6 @@ public class SPSApp {
         // TODO: args or config
         final String url = "https://tweet-service.herokuapp.com/sps";
         final long windowSize = 1 * 1000L; // 1 sec
-        final long lateDataWindowSize = 1 * 60 * 1000; // 1 min
 
         // stream input
         final StartsInput<String> input = new StartsInput<>(url);
@@ -41,7 +40,7 @@ public class SPSApp {
 
         // 1 sec window operator
         Stream<StartsAggMessage> windowStream = new Stream<>();
-        final StartsWindowOperator windowOperator = new StartsWindowOperator(filterStream, windowStream, windowSize, lateDataWindowSize);
+        final StartsWindowOperator windowOperator = new StartsWindowOperator(filterStream, windowStream, windowSize);
         windowOperator.start();
 
 
