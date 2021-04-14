@@ -13,7 +13,7 @@ public class StartsInput<T> implements Input<T> {
   private Logger LOG = LoggerFactory.getLogger(StartsInput.class);
 
   private final String url;
-  private BufferedReader reader;
+  protected BufferedReader reader;
 
   public StartsInput(String url) {
     this.url = url;
@@ -31,6 +31,7 @@ public class StartsInput<T> implements Input<T> {
     return false;
   }
 
+  @SuppressWarnings("unchecked")
   public T nextRecord() {
     try {
       String msg = reader.readLine();

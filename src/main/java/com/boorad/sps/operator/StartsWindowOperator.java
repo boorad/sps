@@ -23,6 +23,7 @@ public class StartsWindowOperator extends Operator<StartsMessage, StartsAggMessa
 
   public StartsWindowOperator(Stream<StartsMessage> inStream, Stream<StartsAggMessage> outStream, long windowSize) {
     super(inStream, outStream);
+    assert(windowSize != 0L);
     this.windowSize = windowSize;
     windows = new ConcurrentHashMap<>();
   }
@@ -55,7 +56,7 @@ public class StartsWindowOperator extends Operator<StartsMessage, StartsAggMessa
   /**
    *  get proper bucket slug
    */
-  private long getWindowSlug(long time) {
+  protected long getWindowSlug(long time) {
     return Math.floorDiv(time, this.windowSize) * this.windowSize;
   }
 
@@ -77,7 +78,7 @@ public class StartsWindowOperator extends Operator<StartsMessage, StartsAggMessa
   /**
    * group messages by title, device, and country, summing the sps metric
    */
-  private ArrayList<StartsAggMessage> reduce(ArrayList<StartsAggMessage> msgs) {
+  protected ArrayList<StartsAggMessage> reduce(ArrayList<StartsAggMessage> msgs) {
     TreeMap<StartsAggMessage, Long> collect = msgs
       .stream()
       .collect(

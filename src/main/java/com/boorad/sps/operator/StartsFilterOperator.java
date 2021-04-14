@@ -9,6 +9,8 @@ public class StartsFilterOperator extends Operator<StartsMessage, StartsMessage>
 
   private final Logger LOG = LoggerFactory.getLogger(StartsFilterOperator.class);
 
+  protected StartsMessage newMsg;
+
   public StartsFilterOperator(Stream<StartsMessage> inStream, Stream<StartsMessage> outStream) {
     super(inStream, outStream);
   }
@@ -16,7 +18,8 @@ public class StartsFilterOperator extends Operator<StartsMessage, StartsMessage>
   public void process(StartsMessage input, Stream<StartsMessage> outStream) {
     // TODO: maybe handle input.title.startsWith("busted data:") ??
     if( input.sev.equals("success") ) {
-      outStream.add(input);
+      newMsg = input; // set this for testing
+      outStream.add(newMsg);
     }
   }
 

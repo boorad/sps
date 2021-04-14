@@ -12,6 +12,7 @@ public class StartsJsonDeserOperator extends Operator<String, StartsMessage> {
   private final Logger LOG = LoggerFactory.getLogger(StartsJsonDeserOperator.class);
 
   private final Gson gson;
+  protected StartsMessage newMsg;
 
   public StartsJsonDeserOperator(Stream<String> inStream, Stream<StartsMessage> outStream) {
     super(inStream, outStream);
@@ -23,7 +24,7 @@ public class StartsJsonDeserOperator extends Operator<String, StartsMessage> {
     if( input.startsWith("data: ") ) {
       String msg = input.substring(6);
       try {
-        StartsMessage newMsg = gson.fromJson(msg, StartsMessage.class);
+        newMsg = gson.fromJson(msg, StartsMessage.class);
         outStream.add(newMsg);
       } catch( JsonSyntaxException e ) {
         LOG.info("Error deserializing Starts message: " + e.getMessage());
